@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "freshdesk-connector"
+version = "0.1.0"
+description = "MCP connector for Freshdesk — enables Agent Studio agents to read tickets"
+authors = ["Faiz Ahmad <faiz.ahmad@toflow.ai>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+httpx = "^0.27.0"
+fastmcp = "^2.0.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
