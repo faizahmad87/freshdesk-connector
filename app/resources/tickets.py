@@ -69,7 +69,9 @@ class TicketService:
         raw = await self.client.get(f"/tickets/{ticket_id}", params=params)
         return Ticket.model_validate(raw)
 
-    async def search_tickets(self, query: str) -> TicketSearchResult:
+    async def search_tickets(self, query: str, page: int = 1) -> TicketSearchResult:
         # Freshdesk search API requires the query value wrapped in double quotes
-        raw = await self.client.get("/search/tickets", params={"query": f'"{query}"'})
+        # page range: 1–10, 30 results per page
+        params = {"query": f'"{query}"', "page": page}
+        raw = await self.client.get("/search/tickets", params=params)
         return TicketSearchResult.model_validate(raw)

@@ -25,13 +25,77 @@ FRESHDESK_DOMAIN=your-subdomain     # e.g. "acme" for acme.freshdesk.com
 FRESHDESK_API_KEY=your_api_key      # Profile Settings → API Key in Freshdesk
 ```
 
-### 3. Run the MCP server
+---
+
+## Running the server
+
+### Option 1 — MCP Inspector (test locally)
+
+Start the inspector:
 
 ```bash
-poetry run python main.py
+poetry run fastmcp dev main.py
 ```
 
-The server runs over `stdio` and is ready to be wired into any MCP-compatible agent.
+This opens the inspector in your browser. Once open:
+
+1. Set **Transport Type** to `STDIO`
+2. Set **Command** to `poetry`
+3. Set **Arguments** to `run python main.py`
+4. Expand **Environment Variables** and add:
+   - `FRESHDESK_DOMAIN` = `your-subdomain`
+   - `FRESHDESK_API_KEY` = `your_api_key`
+5. Click **Connect**
+
+You can now call `list_tickets`, `get_ticket`, and `search_tickets` directly from the UI.
+
+---
+
+### Option 2 — HTTP server (connect remotely via ngrok or Claude Desktop)
+
+Start as an SSE HTTP server:
+
+```bash
+poetry run python main.py --transport sse
+```
+
+The server starts on `http://0.0.0.0:8000`. To expose it publicly:
+
+```bash
+ngrok http 8000
+```
+
+Then connect any MCP-compatible client (Claude, Agent Studio, etc.) to:
+
+```
+https://your-ngrok-url/sse
+```
+
+To use a different port:
+
+```bash
+poetry run python main.py --transport sse --port 9000
+```
+
+---
+
+### Option 3 — Claude Desktop (local stdio)
+
+Add this to your Claude Desktop `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "freshdesk": {
+      "command": "poetry",
+      "args": ["run", "python", "main.py"],
+      "cwd": "/path/to/freshdesk-connector"
+    }
+  }
+}
+```
+
+Restart Claude Desktop and ask: *"List my open Freshdesk tickets"*
 
 ---
 
@@ -39,9 +103,9 @@ The server runs over `stdio` and is ready to be wired into any MCP-compatible ag
 
 | Tool | Description |
 |---|---|
-| `list_tickets` | Paginated ticket list with optional status / priority / date filters |
-| `get_ticket` | Fetch a single ticket by ID; optionally include conversations and requester |
-| `search_tickets` | Full query-syntax search (AND, OR, field comparisons) |
+| `list_tickets` | Paginated ticket list with optional filter, requester, company, date, sort, and include params |
+| `get_ticket` | Fetch a single ticket by ID; optionally include conversations, requester, company, stats |
+| `search_tickets` | Full query-syntax search (AND, OR, field comparisons) with pagination |
 
 See [docs/AGENT_CAPABILITIES.md](docs/AGENT_CAPABILITIES.md) for full details on what the agent can and cannot do.
 
@@ -61,6 +125,6 @@ Tests are fully offline — no Freshdesk account or network access required.
 
 - **Read-only** — no write operations are implemented
 - `list_tickets` returns only the **last 30 days** of tickets by default (Freshdesk platform limit)
-- `search_tickets` returns a **maximum of 30 results** with no pagination (Freshdesk search API limit)
-- `include_conversations=true` on `get_ticket` costs **2 API calls** against your plan's rate limit
+- `search_tickets` returns a **maximum of 30 results per page**, max 10 pages (Freshdesk search API limit)
+- `get_ticket` with `include=["conversations"]` costs **2 API calls** against your plan's rate limit
 - Authentication is **API key only** — OAuth is not required by Freshdesk for server-to-server access

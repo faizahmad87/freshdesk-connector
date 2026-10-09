@@ -85,19 +85,24 @@ async def get_ticket(
 
 
 @mcp.tool()
-async def search_tickets(query: str) -> Dict[str, Any]:
+async def search_tickets(query: str, page: int = 1) -> Dict[str, Any]:
     """
-    Search Freshdesk tickets using query syntax. Returns up to 30 results.
+    Search Freshdesk tickets using query syntax. 30 results per page, max 10 pages.
+
+    - page          : page number 1–10 (default 1)
 
     Field operators : AND, OR, :> (greater/equal), :< (less/equal)
     Supported fields: status, priority, agent_id, group_id, tag, type,
-                      due_by, created_at, updated_at, closed_at, custom fields
+                      due_by, fr_due_by, created_at, updated_at, closed_at,
+                      custom fields (prefix cf_ or use custom_string)
 
     Examples:
-      "status:2 AND priority:4"       → Open + Urgent
-      "priority:3 OR priority:4"      → High or Urgent
-      "status:2 AND group_id:11"      → Open tickets in group 11
-      "created_at:>2024-01-01"        → tickets created after Jan 1 2024
+      "status:2 AND priority:4"                   → Open + Urgent
+      "priority:3 OR priority:4"                  → High or Urgent
+      "status:2 AND group_id:11"                  → Open tickets in group 11
+      "priority:>3 AND created_at:'2024-01-01'"   → Urgent/High after Jan 1
+      "tag:null"                                  → tickets with no tag
+      "agent_id:null"                             → unassigned tickets
     """
-    result = await _ticket_service.search_tickets(query=query)
+    result = await _ticket_service.search_tickets(query=query, page=page)
     return result.model_dump()
