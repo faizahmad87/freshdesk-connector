@@ -28,6 +28,7 @@ async def list_tickets(
     filter: Optional[str] = None,
     requester_id: Optional[int] = None,
     email: Optional[str] = None,
+    unique_external_id: Optional[str] = None,
     company_id: Optional[int] = None,
     updated_since: Optional[str] = None,
     order_by: Optional[str] = None,
@@ -37,16 +38,17 @@ async def list_tickets(
     """
     List Freshdesk tickets with optional filters.
 
-    - page        : page number (default 1, max 300)
-    - per_page    : tickets per page, max 100 (default 30)
-    - filter      : new_and_my_open | watching | spam | deleted
-    - requester_id: filter by requester ID
-    - email       : filter by requester email
-    - company_id  : filter by company ID
-    - updated_since: ISO 8601 string e.g. 2024-01-01T00:00:00Z
-    - order_by    : created_at | due_by | updated_at | status
-    - order_type  : asc | desc
-    - include     : list of stats | requester | description
+    - page              : page number (default 1, max 300)
+    - per_page          : tickets per page, max 100 (default 30)
+    - filter            : new_and_my_open | watching | spam | deleted
+    - requester_id      : filter by requester ID
+    - email             : filter by requester email
+    - unique_external_id: filter by requester's external ID
+    - company_id        : filter by company ID
+    - updated_since     : ISO 8601 string e.g. 2024-01-01T00:00:00Z
+    - order_by          : created_at | due_by | updated_at | status
+    - order_type        : asc | desc
+    - include           : list of stats | requester | description
     """
     tickets = await _ticket_service.list_tickets(
         page=page,
@@ -54,6 +56,7 @@ async def list_tickets(
         filter=filter,
         requester_id=requester_id,
         email=email,
+        unique_external_id=unique_external_id,
         company_id=company_id,
         updated_since=updated_since,
         order_by=order_by,

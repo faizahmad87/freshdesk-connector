@@ -15,6 +15,7 @@ class TicketService:
         filter: Optional[str] = None,
         requester_id: Optional[int] = None,
         email: Optional[str] = None,
+        unique_external_id: Optional[str] = None,
         company_id: Optional[int] = None,
         updated_since: Optional[str] = None,
         order_by: Optional[str] = None,
@@ -35,6 +36,8 @@ class TicketService:
             params["requester_id"] = requester_id
         if email is not None:
             params["email"] = email
+        if unique_external_id is not None:
+            params["unique_external_id"] = unique_external_id
         if company_id is not None:
             params["company_id"] = company_id
         if updated_since is not None:
