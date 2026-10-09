@@ -21,8 +21,13 @@ cp .env.example .env
 Edit `.env` and fill in your values:
 
 ```env
+# Required
 FRESHDESK_DOMAIN=your-subdomain     # e.g. "acme" for acme.freshdesk.com
 FRESHDESK_API_KEY=your_api_key      # Profile Settings → API Key in Freshdesk
+
+# Optional (defaults shown)
+REQUEST_TIMEOUT=30                  # HTTP request timeout in seconds
+MAX_RETRIES=3                       # Number of retries on rate limit (429)
 ```
 
 ---
@@ -65,11 +70,22 @@ The server starts on `http://0.0.0.0:8000`. To expose it publicly:
 ngrok http 8000
 ```
 
-Then connect any MCP-compatible client (Claude, Agent Studio, etc.) to:
+Then connect any MCP-compatible client (Claude, Agent Studio, etc.) to `https://your-ngrok-url/sse`.
 
+To connect Claude Code specifically, add this to your project's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "freshdesk": {
+      "type": "sse",
+      "url": "https://your-ngrok-url/sse"
+    }
+  }
+}
 ```
-https://your-ngrok-url/sse
-```
+
+> **Note:** The `"type": "sse"` field is required — without it Claude Code won't recognise the URL as an SSE transport.
 
 To use a different port:
 

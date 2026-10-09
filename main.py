@@ -16,8 +16,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.transport == "sse":
-        mcp.settings.host = args.host
-        mcp.settings.port = args.port
         print(f"Starting Freshdesk MCP server (SSE) on http://{args.host}:{args.port}/sse")
-
-    mcp.run(transport=args.transport)
+        mcp.run(transport=args.transport, host=args.host, port=args.port)
+    else:
+        mcp.run(transport=args.transport)

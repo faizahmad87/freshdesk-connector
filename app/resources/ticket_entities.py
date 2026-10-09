@@ -2,7 +2,21 @@ from datetime import datetime
 from enum import Enum, IntEnum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+
+
+class _CoerceModel(BaseModel):
+    """Base model that coerces float whole-numbers to int (Freshdesk sometimes returns 49.0)."""
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_float_ints(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            return {
+                k: int(v) if isinstance(v, float) and v == int(v) else v
+                for k, v in data.items()
+            }
+        return data
 
 
 class TicketStatus(IntEnum):
@@ -60,7 +74,7 @@ class TicketOrderBy(str, Enum):
     STATUS = "status"
 
 
-class TicketRequester(BaseModel):
+class TicketRequester(_CoerceModel):
     id: int
     name: str
     email: Optional[str] = None
@@ -68,18 +82,18 @@ class TicketRequester(BaseModel):
     phone: Optional[str] = None
 
 
-class TicketCompany(BaseModel):
+class TicketCompany(_CoerceModel):
     id: int
     name: str
 
 
-class TicketStats(BaseModel):
+class TicketStats(_CoerceModel):
     closed_at: Optional[datetime] = None
     resolved_at: Optional[datetime] = None
     first_responded_at: Optional[datetime] = None
 
 
-class TicketConversation(BaseModel):
+class TicketConversation(_CoerceModel):
     id: int
     ticket_id: int
     body: str
@@ -103,7 +117,7 @@ class TicketConversation(BaseModel):
     attachments: List[Any] = []
 
 
-class Ticket(BaseModel):
+class Ticket(_CoerceModel):
     id: int
     subject: Optional[str] = None
     description: Optional[str] = None
@@ -145,6 +159,6 @@ class Ticket(BaseModel):
     conversations: Optional[List[TicketConversation]] = None
 
 
-class TicketSearchResult(BaseModel):
+class TicketSearchResult(_CoerceModel):
     total: int
     results: List[Ticket]

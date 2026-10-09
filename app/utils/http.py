@@ -36,7 +36,7 @@ class FreshdeskHTTPClient:
             remaining = response.headers.get("X-RateLimit-Remaining")
 
             if response.status_code == 429:
-                retry_after = int(response.headers.get("Retry-After", 60))
+                retry_after = int(float(response.headers.get("Retry-After", 60)))
                 if attempt < Config.MAX_RETRIES - 1:
                     await asyncio.sleep(retry_after)
                     continue
@@ -58,7 +58,7 @@ class FreshdeskHTTPClient:
                 )
 
             # warn when nearing rate limit (under 10% remaining)
-            if remaining is not None and int(remaining) < 5:
+            if remaining is not None and int(float(remaining)) < 5:
                 print(f"[warn] Freshdesk rate limit low: {remaining} requests remaining")
 
             return response.json()
